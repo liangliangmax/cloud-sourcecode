@@ -217,8 +217,6 @@ ReflectiveFeign.FeignInvocationHandler.invoke(Object proxy, Method method, Objec
                                                                         -->MethodProperty.deserializeAndSet(JsonParser p, DeserializationContext ctxt,Object instance)
                                                                             -->_setter.invoke(instance, value)
 
--->InvocableHandlerMethod.doInvoke(Object... args)
-    -->
 
 
 

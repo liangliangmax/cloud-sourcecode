@@ -1,0 +1,252 @@
+1.启动过程分析
+springboot在启动过程中会调用EnableFeignClients将FeignClientsRegistrar中的bean注册到spring容器中
+
+
+-->ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
+  -->processConfigBeanDefinitions(BeanDefinitionRegistry registry)
+     -->ConfigurationClassParser parser = new ConfigurationClassParser(
+        				this.metadataReaderFactory, this.problemReporter, this.environment,
+        				this.resourceLoader, this.componentScanBeanNameGenerator, registry); //Parse each @Configuration class
+     -->Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());
+     -->if (this.reader == null) {
+            this.reader = new ConfigurationClassBeanDefinitionReader(
+                registry, this.sourceExtractor, this.resourceLoader, this.environment,
+                this.importBeanNameGenerator, parser.getImportRegistry());
+        } 
+     -->this.reader.loadBeanDefinitions(configClasses);
+        -->ConfigurationClassBeanDefinitionReader.loadBeanDefinitions(Set<ConfigurationClass> configurationModel) //这个类会将所有的configuration类加载到容器中
+            -->loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass, TrackedConditionEvaluator trackedConditionEvaluator)  
+                -->loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars)
+                    -->registrar.registerBeanDefinitions(metadata, this.registry)
+
+                        -->FeignClientsRegistrar.registerDefaultConfiguration(metadata, registry) 	
+                            -->Map<String, Object> defaultAttrs = metadata.getAnnotationAttributes(EnableFeignClients.class.getName(), true);
+                            -->registerClientConfiguration(BeanDefinitionRegistry registry, Object name,Object configuration)
+                               -->registry.registerBeanDefinition("default.com.liang.consumer.ConsumerApplicationBootstrap.FeignClientSpecification",builder.getBeanDefinition());
+                        
+                        -->FeignClientsRegistrar.registerFeignClients(AnnotationMetadata metadata,BeanDefinitionRegistry registry)
+                            -->ClassPathScanningCandidateComponentProvider scanner = getScanner();
+                               scanner.setResourceLoader(this.resourceLoader);
+                               Map<String, Object> attrs = metadata.getAnnotationAttributes(EnableFeignClients.class.getName());
+                               AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(FeignClient.class);
+                               scanner.addIncludeFilter(annotationTypeFilter);
+                               Map<String, Object> attributes = annotationMetadata.getAnnotationAttributes(FeignClient.class.getCanonicalName()); //解析出FeignClient注解中的value等信息
+                               -->registerClientConfiguration(BeanDefinitionRegistry registry, Object name,Object configuration)
+                               -->registerFeignClient(BeanDefinitionRegistry registry,AnnotationMetadata annotationMetadata, Map<String, Object> attributes)
+                                  //在这一步，只是将feignclient中的一些信息从注解中读出来，然后封装成一个beanDefinition，放到spring容器中
+                                  -->String className = annotationMetadata.getClassName(); //com.liang.consumer.client.UserFeignClient
+                                     BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(FeignClientFactoryBean.class);
+                                     definition.addPropertyValue("url", getUrl(attributes));
+                                     definition.addPropertyValue("path", getPath(attributes));
+                                     String name = getName(attributes); //service-provider
+                                     definition.addPropertyValue("name", name);
+                                     definition.addPropertyValue("type", className);
+                                     definition.addPropertyValue("decode404", attributes.get("decode404"));
+                                     definition.addPropertyValue("fallback", attributes.get("fallback"));
+                                     definition.addPropertyValue("fallbackFactory", attributes.get("fallbackFactory"));
+                                     definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+                                     String alias = name + "FeignClient"; //service-providerFeignClient
+                                     AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
+                                     BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className,new String[] { alias }); //alias = service-providerFeignClient
+                                     BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
+                                         -->String beanName = definitionHolder.getBeanName(); //com.liang.consumer.client.UserFeignClient
+                                            registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition()); //Register bean definition under primary name.
+                                            registry.registerAlias(beanName, alias);
+                                                -->SimpleAliasRegistry.registerAlias(String name, String alias)
+                                                    -->this.aliasMap.put(alias, name); //alias = service-providerFeignClient,name = com.liang.consumer.client.UserFeignClient
+
+
+
+
+2.feignClient调用过程分析
+ReflectiveFeign.FeignInvocationHandler.invoke(Object proxy, Method method, Object[] args)
+    -->dispatch.get(method).invoke(args)    //method = public abstract com.liang.api.entity.NeuabcRestApiResult com.liang.api.clientapi.UserApi.save(com.liang.api.entity.User),args = user对象
+        -->SynchronousMethodHandler.invoke(Object[] argv)
+            -->feign.RequestTemplate template = buildTemplateFromArgs.create(argv);
+                -->ReflectiveFeign.BuildTemplateByResolvingArgs.create(Object[] argv)
+                    -->feign.RequestTemplate mutable = new feign.RequestTemplate(metadata.template());
+                       RequestTemplate template = resolve(argv, mutable, varBuilder);
+                           -->ReflectiveFeign.BuildEncodedTemplateFromArgs.resolve(Object[] argv, RequestTemplate mutable,Map<String, Object> variables)
+                               -->encoder.encode(body, metadata.bodyType(), mutable);
+                                   -->org.springframework.cloud.openfeign.support.SpringEncoder.encode(Object requestBody, Type bodyType, RequestTemplate request)
+                                       -->FeignOutputMessage outputMessage = new FeignOutputMessage(request);
+                               -->super.resolve(argv, mutable, variables)
+                                   -->ReflectiveFeign.BuildTemplateByResolvingArgs.resolve(Object[] argv, RequestTemplate mutable,Map<String, Object> variables)
+                                       -->mutable.resolve(variables, variableToEncoded);
+                                           -->feign.RequestTemplate.resolve(Map<String, ?> unencoded, Map<String, Boolean> alreadyEncoded)
+                                               -->replaceQueryValues(Map<String, ?> unencoded, Map<String, Boolean> alreadyEncoded)
+                                               -->expand(String template, Map<String, ?> variables) //template = /user/save   处理url中的参数，然后处理消息头
+
+            -->SynchronousMethodHandler.executeAndDecode(RequestTemplate template)
+                -->Request request = targetRequest(template);
+                    -->target.apply(new RequestTemplate(template)); //template 中封装了请求的路径：/user/save，以及请求的参数，方法，协议等一些内容
+                        -->feign.Target.HardCodedTarget.apply(RequestTemplate input)
+                            //在这一步中对input进行了操作，在请求路径之前加了http://service-provider，最后结果变成
+                            POST http://service-provider/user/save HTTP/1.1
+                            Accept: application/json;charset=UTF-8
+                            Content-Type: application/json;charset=UTF-8
+                            Content-Length: 52
+                            content-type: application/json
+                            cache-control: no-cache
+                            postman-token: f8f5e318-da72-490d-a380-1ec5b657d896
+                            user-agent: PostmanRuntime/7.1.1
+                            accept: */*
+                            host: localhost:8000
+                            cookie: SESSION=YzU5MjY1MmUtOGY1Mi00ZjExLWI1MzYtYjVkNmU2MDcxZmM1; JSESSIONID=AE2FE2F4DA1266DC98DC78BBF5964F56
+                            accept-encoding: gzip, deflate
+                            content-length: 59
+                            connection: keep-alive
+                            {"username":"zhangsan","password":"123456","age":23}
+
+                            -->input.request()
+                                -->feign.Request.create(method, url + queryLine(),Collections.unmodifiableMap(safeCopy),body, charset)
+                                    -->return new Request("POST", "http://service-provider/user/save",Collections.unmodifiableMap(safeCopy),body, "UTF-8") //safeCopy是消息头内容 body是byte[]
+
+                -->response = client.execute(request, options)
+                    -->LoadBalancerFeignClient.execute(Request request, Request.Options options)
+                        -->URI asUri = URI.create(request.url());   //http://service-provider/user/save
+                           String clientName = asUri.getHost();     //service-provider
+                           URI uriWithoutHost = cleanUrl(request.url(), clientName);    // http:///user/save
+                           FeignLoadBalancer.RibbonRequest ribbonRequest = new FeignLoadBalancer.RibbonRequest(this.delegate, request, uriWithoutHost)
+                           IClientConfig requestConfig = getClientConfig(options, clientName);
+                               -->LoadBalancerFeignClient.getClientConfig(Request.Options options, "service-provider") //options中是request连接超时时间等相关信息，
+                                   -->this.clientFactory.getClientConfig(clientName);
+                                       -->SpringClientFactory.getClientConfig(String name)
+                                           -->getInstance(String name, Class<C> type) //name = service-provider , type = interface com.netflix.client.config.IClientConfig
+                                               -->C instance = super.getInstance(name, type)
+                                                   -->NamedContextFactory.getInstance(String name, Class<T> type)
+                                                       -->AnnotationConfigApplicationContext context = getContext(name);
+                                                           -->return context.getBean(type)
+
+                           lbClient(clientName).executeWithLoadBalancer(ribbonRequest,requestConfig).toResponse()
+                               -->LoadBalancerFeignClient.lbClient("service-provider")
+                                   -->this.lbClientFactory.create("service-provider")
+                                       -->CachingSpringLoadBalancerFactory.create("service-provider")
+                               -->AbstractLoadBalancerAwareClient.executeWithLoadBalancer(final S request, final IClientConfig requestConfig)
+                                   -->LoadBalancerCommand<T> command = buildLoadBalancerCommand(request, requestConfig)
+                                       -->RequestSpecificRetryHandler handler = FeignLoadBalancer.getRequestSpecificRetryHandler(RibbonRequest request, IClientConfig requestConfig)
+                                          LoadBalancerCommand.Builder<T> builder = LoadBalancerCommand
+                                                        .<T>builder()
+                                          				.withLoadBalancerContext(this)
+                                          				.withRetryHandler(handler)
+                                          				.withLoadBalancerURI(request.getUri());
+                                          customizeLoadBalancerCommandBuilder(request, config, builder)  // do nothing by default, give a chance to its derived class to customize the builder
+                                          return builder.build()
+                                              -->return new LoadBalancerCommand<T>(builder)
+
+                                   -->command.submit(
+                                           new ServerOperation<T>() {
+                                              @Override
+                                              public Observable<T> call(Server server) {
+                                                  URI finalUri = reconstructURIWithServer(server, request.getUri());
+                                                  S requestForServer = (S) request.replaceUri(finalUri);
+                                                  try {
+                                                      return Observable.just(AbstractLoadBalancerAwareClient.this.execute(requestForServer, requestConfig));
+                                                  }
+                                                  catch (Exception e) {
+                                                      return Observable.error(e);
+                                                  }
+                                              }
+                                          })
+                                          .toBlocking()
+                                          .single();
+                                      )
+                                      -->LoadBalancerCommand.submit(final ServerOperation<T> operation)
+                                          -->selectServer()
+                                              -->Server server = loadBalancerContext.getServerFromLoadBalancer(loadBalancerURI, loadBalancerKey);
+                                                  -->LoadBalancerContext.getServerFromLoadBalancer("http:///user/save", null)
+                                                      -->ILoadBalancer lb = getLoadBalancer(); //DynamicServerListLoadBalancer:{NFLoadBalancer:name=service-provider,current list of Servers=[localhost:8002],Load balancer stats=Zone stats: {defaultzone=[Zone:defaultzone;	Instance count:1;	Active connections count: 0;	Circuit breaker tripped count: 0;	Active connections per server: 0.0;]
+                                                                                                 },Server stats: [[Server:localhost:8002;	Zone:defaultZone;	Total Requests:1;	Successive connection failure:0;	Total blackout seconds:0;	Last connection made:Fri May 24 10:31:25 CST 2019;	First connection made: Fri May 24 10:31:25 CST 2019;	Active Connections:0;	total failure count in last (1000) msecs:0;	average resp time:55.0;	90 percentile resp time:0.0;	95 percentile resp time:0.0;	min resp time:55.0;	max resp time:55.0;	stddev resp time:0.0]
+                                                                                                 ]}ServerList:org.springframework.cloud.netflix.ribbon.eureka.DomainExtractingServerList@5bee8a42
+
+                                                      -->Server svc = lb.chooseServer(loadBalancerKey)
+                                                          -->ZoneAwareLoadBalancer.chooseServer(Object key)
+                                                              -->super.chooseServer(key)
+                                                                  -->BaseLoadBalancer.chooseServer(Object key)
+                                                                      -->rule.choose(key)
+                                                                          -->PredicateBasedRule.choose(Object key)
+                                                                              -->ILoadBalancer lb = getLoadBalancer();
+                                                                                 Optional<Server> server = getPredicate().chooseRoundRobinAfterFiltering(lb.getAllServers(), key)
+                                                                                     -->return BaseLoadBalancer.getAllServers() //localhost:8002
+                                                                              -->return server.get()
+
+                                      -->URI finalUri = FeignLoadBalancer.reconstructURIWithServer(Server server, URI original)
+                                          -->super.reconstructURIWithServer(server, uri)
+                                              -->return LoadBalancerContext.reconstructURIWithServer(Server server, URI original) //http://localhost:8002/user/save
+                                         S requestForServer = (S) request.replaceUri(finalUri);
+                                         Observable.just(AbstractLoadBalancerAwareClient.this.execute(requestForServer, requestConfig))
+                                             -->FeignLoadBalancer.execute(RibbonRequest request, IClientConfig configOverride)
+                                                 -->Response response = request.client().execute(request.toRequest(), options);
+                                                     -->Client.Default.execute(Request request, Options options)
+                                                         -->HttpURLConnection connection = convertAndSend(request, options);
+                                                             -->final HttpURLConnection connection = (HttpURLConnection) new URL(request.url()).openConnection();
+                                                                connection.setConnectTimeout(options.connectTimeoutMillis());
+                                                                connection.setReadTimeout(options.readTimeoutMillis());
+                                                                connection.setAllowUserInteraction(false);
+                                                                connection.setInstanceFollowRedirects(options.isFollowRedirects());
+                                                                connection.setRequestMethod(request.method());
+                                                                connection.setFixedLengthStreamingMode(contentLength);
+                                                                OutputStream out = connection.getOutputStream();
+                                                                out.write(request.body())
+                                                         -->convertResponse(connection).toBuilder().request(request).build()
+                                                             -->Client.convertResponse(HttpURLConnection connection)
+                                                                 -->InputStream stream = connection.getInputStream()
+                                                                     -->return Response.builder()
+                                                                                      .status(status)
+                                                                                      .reason(reason)
+                                                                                      .headers(headers)
+                                                                                      .body(stream, length)
+                                                                                      .build();
+
+                                                 -->return new RibbonResponse(request.getUri(), response)
+
+                -->Object result = decode(response)
+                    -->SynchronousMethodHandler.decode(Response response)
+                        -->decoder.decode(response, metadata.returnType()) //decoder = OptionalDecoder, returnType = com.liang.api.entity.NeuabcRestApiResult<java.lang.String>
+                            -->OptionalDecoder.decode(Response response, Type type)
+                                -->ResponseEntityDecoder.decode(final Response response, Type type)
+                                    -->SpringDecoder.decode(final Response response, Type type)
+                                        -->HttpMessageConverterExtractor.extractData(ClientHttpResponse response)
+                                            -->AbstractJackson2HttpMessageConverter.read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
+                                                -->readJavaType(JavaType javaType, HttpInputMessage inputMessage) //javaType = [simple type, class com.liang.api.entity.NeuabcRestApiResult<java.lang.String>]
+                                                    -->ObjectMapper.readValue(InputStream src, JavaType valueType)
+                                                        -->_readMapAndClose(JsonParser p0, JavaType valueType)
+                                                            -->result = deser.deserialize(p, ctxt);
+                                                                -->BeanDeserializer.deserialize(JsonParser p, DeserializationContext ctxt)
+                                                                    -->deserializeFromObject(JsonParser p, DeserializationContext ctxt)
+                                                                        -->MethodProperty.deserializeAndSet(JsonParser p, DeserializationContext ctxt,Object instance)
+                                                                            -->_setter.invoke(instance, value)
+
+-->InvocableHandlerMethod.doInvoke(Object... args)
+    -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

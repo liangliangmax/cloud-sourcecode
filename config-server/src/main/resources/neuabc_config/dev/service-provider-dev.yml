@@ -25,13 +25,14 @@ spring:
         poolPreparedStatements: true
         maxOpenPreparedStatements: 50
     redis:
-        enable: true
-        database: 1
         host: 10.4.249.94
-        pool:
-            max-active: 20
         password: 123456
-        port: 6379
+        port: 6380
+        lettuce:
+            pool:
+                max-active: 20
+                max-wait: -1
+        database: 9
 
     rabbitmq:
         addresses: 10.4.249.94:5672

@@ -31,6 +31,12 @@ public class RedisTest {
 
     private AtomicLong atomicLong = new AtomicLong();
 
+    @Autowired
+    private RedisTemplate<String, Object> objRedisTemplate;
+
+    @Autowired
+    private RedisTemplate<String, Integer> intRedisTemplate;
+
     /**
      * 测试list放入
      * 一个key相当于一张表，每个表中可以存很多行数据
@@ -297,6 +303,19 @@ public class RedisTest {
         stringRedisTemplate.opsForZSet().range("zset:number1",0,5).stream().forEach(System.out::println);
 
         System.out.println(stringRedisTemplate.hasKey("zset:number1"));
+
+    }
+
+    @Test
+    public void testSeri(){
+
+        User user = new User();
+
+        user.setId("11");
+        user.setUsername("22");
+        user.setAgeInt(3);
+
+        redisTemplate.opsForHash().put("user:11",user.hashCode(),user);
 
     }
 

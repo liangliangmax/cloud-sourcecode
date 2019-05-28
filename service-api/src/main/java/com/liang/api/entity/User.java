@@ -10,7 +10,9 @@ public class User implements Serializable {
 
     private String password;
 
-    private Integer age;
+    private int age;
+
+    private int ageInt;
 
     public String getId() {
         return id;
@@ -36,12 +38,20 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public Integer getAge() {
+    public int getAge() {
         return age;
     }
 
-    public void setAge(Integer age) {
+    public void setAge(int age) {
         this.age = age;
+    }
+
+    public int getAgeInt() {
+        return ageInt;
+    }
+
+    public void setAgeInt(int ageInt) {
+        this.ageInt = ageInt;
     }
 
     @Override
@@ -51,6 +61,7 @@ public class User implements Serializable {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", age=" + age +
+                ", ageInt=" + ageInt +
                 '}';
     }
 }

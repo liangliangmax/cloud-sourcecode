@@ -10,13 +10,5 @@ import java.io.Serializable;
 @Service
 public class RedisService {
 
-    @Autowired
-    private RedisTemplate<String, Serializable> redisTemplate;
-
-    public void exec(){
-
-
-
-    }
 
 }

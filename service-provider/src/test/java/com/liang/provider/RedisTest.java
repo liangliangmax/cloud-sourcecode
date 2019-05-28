@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.serializer.*;
@@ -184,11 +185,27 @@ public class RedisTest {
     public void testSerializable(){
 
         ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
+
+        /**
+         * Simple String to byte[] (and back) serializer. Converts Strings into bytes and vice-versa using the specified charset
+         * (by default UTF-8).
+         * <p>
+         * Useful when the interaction with the Redis happens mainly through Strings.
+         * <p>
+         * Does not perform any null conversion since empty strings are valid keys/values.
+         *
+         */
         stringRedisTemplate.setKeySerializer(new StringRedisSerializer());
         stringRedisTemplate.setValueSerializer(new StringRedisSerializer());
         operations.set("StringRedisSerializer", "1");
         operations.increment("StringRedisSerializer", 1);
 
+        /**
+         * Generic String to byte[] (and back) serializer. Relies on the Spring {@link ConversionService} to transform objects
+         *  * into String and vice versa. The Strings are convert into bytes and vice-versa using the specified charset (by default
+         *  * UTF-8). <b>Note:</b> The conversion service initialization happens automatically if the class is defined as a Spring
+         *  * bean. <b>Note:</b> Does not handle nulls in any special way delegating everything to the container.
+         */
         stringRedisTemplate.setKeySerializer(new GenericToStringSerializer<String>(String.class));
         stringRedisTemplate.setValueSerializer(new GenericToStringSerializer<String>(String.class));
         operations.set("GenericToStringSerializer", "1");
@@ -254,6 +271,10 @@ public class RedisTest {
         //随机取一个成员
         System.out.println(stringRedisTemplate.opsForSet().randomMember("set:number"));
 
+        Cursor<String> cursor = stringRedisTemplate.opsForSet().scan("set:number", ScanOptions.NONE);
+        while(cursor.hasNext()){
+            System.out.println(cursor.next());
+        }
     }
 
     /**
@@ -270,8 +291,12 @@ public class RedisTest {
         tuples1.add(objectTypedTuple2);
 
 
-        stringRedisTemplate.opsForZSet().add("set:number1", tuples1);
-        stringRedisTemplate.opsForZSet().add("set:number2", tuples1);
+        stringRedisTemplate.opsForZSet().add("zset:number1", tuples1);
+        stringRedisTemplate.opsForZSet().add("zset:number2", tuples1);
+
+        stringRedisTemplate.opsForZSet().range("zset:number1",0,5).stream().forEach(System.out::println);
+
+        System.out.println(stringRedisTemplate.hasKey("zset:number1"));
 
     }
 

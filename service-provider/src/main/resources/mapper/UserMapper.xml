@@ -6,4 +6,9 @@
 
     select * from user
   </select>
+
+  <insert id="add" parameterType="com.liang.api.entity.User">
+    insert into user (id,username,password) values (#{id},#{username},#{password})
+
+  </insert>
 </mapper>

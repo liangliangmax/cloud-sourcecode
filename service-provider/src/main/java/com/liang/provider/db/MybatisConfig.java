@@ -12,8 +12,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,7 +85,7 @@ public class MybatisConfig {
      */
     @Bean(name="dynamicDataSource")
     @Primary
-    public DynamicDataSource DataSource(@Qualifier("dataSourceDam") DataSource dataSourceDam,
+    public DynamicDataSource dataSource(@Qualifier("dataSourceDam") DataSource dataSourceDam,
                                         @Qualifier("dataSourceNeuabc") DataSource dataSourceNeuabc){
         Map<Object, Object> targetDataSource = new HashMap<>();
         targetDataSource.put(DatabaseType.DAM, dataSourceDam);
@@ -123,5 +126,10 @@ public class MybatisConfig {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(@Qualifier("dynamicDataSource") DataSource dataSource) throws SQLException {
+        return new DataSourceTransactionManager(dataSource);
     }
 }

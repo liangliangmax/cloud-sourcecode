@@ -1,4 +1,4 @@
-package com.liang.provider.config;
+package com.liang.provider.redis;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;

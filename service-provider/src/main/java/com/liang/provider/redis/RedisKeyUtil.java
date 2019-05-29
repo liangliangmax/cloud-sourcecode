@@ -1,4 +1,4 @@
-package com.liang.provider.util;
+package com.liang.provider.redis;
 
 /**
  * redisKey设计

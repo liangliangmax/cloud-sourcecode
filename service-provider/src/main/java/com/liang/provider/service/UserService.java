@@ -29,9 +29,11 @@ public class UserService {
 
         db.put(user.getId(),user);
 
+        db.entrySet().stream().forEach(System.out::println);
+
     }
 
-    @CachePut(value="user",key = "#result.productId",condition = "#result!=null")
+    @CachePut(value="user",key = "#result.id",condition = "#result!=null")
     public void update(User user){
 
         db.put(user.getId(),user);
@@ -44,13 +46,13 @@ public class UserService {
 
     }
 
-    @CacheEvict(value="user",allEntries = true,beforeInvocation = true) //清楚所有缓存
+    @CacheEvict(value="user",allEntries = true) //清楚所有缓存
     public boolean deleteById(String id){
 
         return db.remove(id) == null?false:true;
     }
 
-    @Cacheable(cacheNames = "user",key = "#root.methodName+'['+#id+']'")
+    @Cacheable(cacheNames = "user",key = "#root.methodName+'['+#id+']'",condition = "#id!=null && #result!=null")
     public User getById(String id){
 
 

@@ -31,15 +31,6 @@ public class RedisConfig {
         return template;
     }
 
-
-    @Bean
-    public RedisTemplate<String, Integer> intRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Integer> redisTemplate = new RedisTemplate<String, Integer>();
-        redisTemplate.setConnectionFactory(connectionFactory);
-        return redisTemplate;
-    }
-
-
     @Bean
     @Primary
     public RedisTemplate<String, Object> objRedisTemplate(RedisConnectionFactory connectionFactory) {

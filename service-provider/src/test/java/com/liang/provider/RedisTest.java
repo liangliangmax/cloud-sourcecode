@@ -26,8 +26,6 @@ public class RedisTest {
     @Autowired
     private RedisTemplate<String, Serializable> redisTemplate;
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
 
     private AtomicLong atomicLong = new AtomicLong();
 
@@ -35,7 +33,7 @@ public class RedisTest {
     private RedisTemplate<String, Object> objRedisTemplate;
 
     @Autowired
-    private RedisTemplate<String, Integer> intRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 测试list放入
@@ -315,7 +313,7 @@ public class RedisTest {
         user.setUsername("22");
         user.setAgeInt(3);
 
-        redisTemplate.opsForHash().put("user:11",user.hashCode(),user);
+        stringRedisTemplate.opsForHash().put("user:11",user.hashCode(),user);
 
     }
 

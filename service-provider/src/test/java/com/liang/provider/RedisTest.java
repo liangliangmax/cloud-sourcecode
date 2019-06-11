@@ -46,7 +46,7 @@ public class RedisTest {
             User user = new User();
             user.setId(atomicLong.addAndGet(1L)+"");
             user.setUsername("user"+i);
-            user.setAge(i);
+            user.setAge(i+"");
 
             redisTemplate.opsForList().leftPush("1",user);
             System.out.println("放到redis中了");
@@ -140,7 +140,7 @@ public class RedisTest {
             User user = new User();
             user.setId(atomicLong.addAndGet(1L)+"");
             user.setUsername("zhangsan"+i);
-            user.setAge(i);
+            user.setAge(i+"");
 
             redisTemplate.opsForHash().put("users",user.hashCode(),user);
             System.out.println(redisTemplate.opsForHash().get("users",user.hashCode()));

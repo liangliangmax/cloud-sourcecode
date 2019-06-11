@@ -7,8 +7,9 @@
     select * from user
   </select>
 
+  <!--如果age字段有默认值但是非必填，age字段有值就按值填写，如果没有值就按默认值填写，如果是必填字段，则必须设置值,有默认值也不行-->
   <insert id="add" parameterType="com.liang.api.entity.User">
-    insert into user (id,username,password) values (#{id},#{username},#{password})
+    insert into user (id,username,password,age) values (#{id},#{username},#{password},#{age})
 
   </insert>
 </mapper>

@@ -1,0 +1,8 @@
+这个包是测试多数据源切换的包
+
+通过继承mybatis的AbstractRoutingDataSource类来实现动态切换
+
+通过aop的方式获取到请求参数，然后判断从哪个库操作数据库，
+通过threadLocal类将数据库类型传递到AbstractRoutingDataSource类中，进行数据库动态切换
+
+使用时候正常配置事务即可，但是不能跨数据库进行事务操作

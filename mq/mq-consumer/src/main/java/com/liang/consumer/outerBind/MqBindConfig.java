@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * 在生产者中或者消费者中或者两个都放就行，
  * 但是消费者如果不进行绑定，先启动消费者，会直接报错
  * 如果生产者不进行绑定先启动生产者，代码正常运行，只有在调用到发消息时候才会报错
+ * 所以我认为放置在消费者中进行绑定可能比较合适
  */
 @Configuration
 public class MqBindConfig {

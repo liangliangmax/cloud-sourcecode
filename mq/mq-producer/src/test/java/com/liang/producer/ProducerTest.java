@@ -1,6 +1,7 @@
 package com.liang.producer;
 
 import com.liang.producer.fanout.FanoutProducer;
+import com.liang.producer.outerBind.OuterBindSender;
 import com.liang.producer.queue.QueueSender;
 import com.liang.producer.topic.TopicProducer;
 import org.junit.Test;
@@ -49,6 +50,15 @@ public class ProducerTest {
     }
 
 
+    @Autowired
+    private OuterBindSender outerBindSender;
+
+    @Test
+    public void outerBindTest() throws Exception {
+
+        outerBindSender.stringSend();
+
+    }
 
 
 

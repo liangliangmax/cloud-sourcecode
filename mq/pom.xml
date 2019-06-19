@@ -5,6 +5,7 @@
     <modules>
         <module>mq-producer</module>
         <module>mq-consumer</module>
+        <module>mq-bind</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

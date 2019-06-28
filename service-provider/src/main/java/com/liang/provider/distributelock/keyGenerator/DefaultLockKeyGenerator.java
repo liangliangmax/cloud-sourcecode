@@ -46,8 +46,16 @@ public class DefaultLockKeyGenerator implements LockKeyGenerator {
                 builder.append(distributeLock.delimiter());
 
                 //将获取的规则进行md5运算，这样可以减少key的长度，还可以保证数据一致
-                String key = DigestUtils.md5DigestAsHex(annotation.name().getBytes());
-                builder.append(key);
+                if(StringUtils.isEmpty(annotation.name())){
+                    //如果没有key的默认值，则取对应的参数进行hash运算
+                    String key = DigestUtils.md5DigestAsHex(toByteArray(args[i]));
+                    builder.append(key);
+
+                }else {
+                    String key = DigestUtils.md5DigestAsHex(annotation.name().getBytes());
+                    builder.append(key);
+                }
+
 
                 useCacheParam = true;
 

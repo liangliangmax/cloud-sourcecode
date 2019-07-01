@@ -1,0 +1,24 @@
+server:
+  port: 8200
+logging:
+  level:
+    com.liang: debug
+
+spring:
+  rabbitmq:
+    addresses: 172.16.62.192:5672
+    username: root
+    password: root
+    virtual-host: /
+    publisher-confirms: true  #    支持发布确认
+    publisher-returns: true   #    支持发布返回
+    template:
+      mandatory: true
+    listener:
+      simple:
+        concurrency: 5
+        max-concurrency: 100
+        acknowledge-mode: manual
+        retry:
+          enabled: true   #开启重试
+          max-attempts: 3 #最大重试次数

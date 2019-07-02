@@ -10,6 +10,7 @@ spring:
     username: root
     password: root
     virtual-host: /
+
     publisher-confirms: true  #    支持发布确认
     publisher-returns: true   #    支持发布返回
     template:
@@ -22,3 +23,6 @@ spring:
         retry:
           enabled: true   #开启重试
           max-attempts: 3 #最大重试次数
+    cache:
+      channel:
+        size: 50

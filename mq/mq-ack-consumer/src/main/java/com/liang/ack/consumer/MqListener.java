@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -26,20 +29,28 @@ public class MqListener {
             "ack.queue"
     })
     @RabbitHandler
-    public void sendSms(Map<String,String> smsInfo, Channel channel, Message message){
+    public void sendSms(@Payload Map<String,String> smsInfo, Channel channel, @Headers Map<String,Object> headers,Message message){
+
+        Long deliveryTag = (Long)headers.get(AmqpHeaders.DELIVERY_TAG);
+
         try {
 
             System.out.println(smsInfo);
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+
+            System.out.println(headers);
+
+            int i = 1/0;
+            channel.basicAck(deliveryTag,false);
 
             System.out.println(message.getMessageProperties().getDeliveryTag());
 
+            System.out.println(deliveryTag);
 
         } catch (Exception e) {
             log.error(e.getMessage());
             try {
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(),false,true);
-            } catch (IOException e1) {
+                channel.basicNack(deliveryTag,false,true);
+            } catch (Exception e1) {
                 e1.printStackTrace();
             }
         }

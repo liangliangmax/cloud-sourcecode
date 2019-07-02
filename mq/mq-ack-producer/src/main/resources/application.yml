@@ -14,11 +14,3 @@ spring:
     publisher-returns: true
     template:
       mandatory: true
-    listener:
-      simple:
-        concurrency: 5
-        max-concurrency: 100
-        acknowledge-mode: manual
-        retry:
-          enabled: true   #开启重试
-          max-attempts: 3 #最大重试次数

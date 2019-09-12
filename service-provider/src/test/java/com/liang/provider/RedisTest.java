@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.serializer.*;
@@ -317,5 +318,16 @@ public class RedisTest {
 
     }
 
+    @Test
+    public void test(){
+
+        redisTemplate.opsForZSet();
+
+        redisTemplate.opsForList();
+
+        JedisConnectionFactory jedisConnectionFactory = (JedisConnectionFactory) stringRedisTemplate.getConnectionFactory();
+        jedisConnectionFactory.setDatabase(4);
+
+    }
 
 }

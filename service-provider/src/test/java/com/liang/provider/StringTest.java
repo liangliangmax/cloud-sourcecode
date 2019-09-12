@@ -1,16 +1,32 @@
 package com.liang.provider;
 
+import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 public class StringTest {
 
 
-    public static void main(String[] args) {
-        String a = "a";
+    public static void main(String[] args) throws NoSuchMethodException {
+        String a = "\n";
 
-        String b = "b";
+        System.out.println(StringUtils.isEmpty(a));
 
-        String c = a+b;
+        System.out.println(a);
 
-        System.out.println(c);
 
+        Method method = StringTest.class.getDeclaredMethod("test",String.class);
+
+        Parameter[] parameters = method.getParameters();
+
+        for (Parameter parameter:parameters){
+            System.out.println(parameter);
+        }
+    }
+
+    public void test(String aaa){
+
+        System.out.println(aaa);
     }
 }

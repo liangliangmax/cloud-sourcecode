@@ -1,0 +1,23 @@
+server:
+  port: 8002
+  tomcat:
+    max-connections: 10000
+    max-threads: 1000
+    uri-encoding: UTF-8
+
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+  redis:
+    enable: true
+    host: 10.4.249.94
+    password: 123456
+    port: 6379
+    lettuce:
+      pool:
+        max-active: 20
+        max-wait: -1
+    database: 9

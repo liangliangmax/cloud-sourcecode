@@ -19,7 +19,7 @@ public class TestController {
 
     private Map<String,User> map = new ConcurrentHashMap<>();
 
-    @DistributeLock(prefix = "user",expire = 60)
+    @DistributeLock(prefix = "user",expire = 10)
     @PostMapping("/index")
     public String test(@LockParam @RequestBody List<User> list) throws InterruptedException {
 
@@ -28,7 +28,7 @@ public class TestController {
 
             map.put(user.getId(),user);
             System.out.println(user);
-            Thread.sleep(30000);
+            Thread.sleep(1000);
 
         }
 

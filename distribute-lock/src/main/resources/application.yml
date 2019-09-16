@@ -1,5 +1,5 @@
 server:
-  port: 8002
+  port: 8003
   tomcat:
     max-connections: 10000
     max-threads: 1000
@@ -13,7 +13,7 @@ spring:
 
   redis:
     enable: true
-    host: 10.4.249.94
+    host: 172.16.62.192
     password: 123456
     port: 6379
     lettuce:

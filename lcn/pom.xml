@@ -20,6 +20,7 @@
         <module>lcn-server</module>
         <module>lcn-service-a</module>
         <module>lcn-service-b</module>
+        <module>lcn-service-c</module>
         <!--<module>merge_service</module>-->
     </modules>
 

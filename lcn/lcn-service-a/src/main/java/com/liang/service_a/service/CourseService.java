@@ -35,7 +35,6 @@ public class CourseService {
 
         courseMapper.addCourse(course);
 
-        int i = 1/0;
         courseInfoMapper.addCourseInfo(course.getCourseInfo());
 
         return "ok";

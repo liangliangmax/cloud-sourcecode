@@ -7,12 +7,12 @@ eureka:
 
 
 server:
-  port: 8222
+  port: 8444
 
 
 spring:
   application:
-    name: service-a
+    name: service-c
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -61,5 +61,5 @@ tx-lcn:
 
 logging:
   level:
-    com.liang.service_a.dao: DEBUG
+    com.liang.service_c.dao: DEBUG
     org.mybatis: DEBUG

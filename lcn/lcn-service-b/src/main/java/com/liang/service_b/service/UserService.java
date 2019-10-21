@@ -4,6 +4,7 @@ import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.liang.service_b.dao.UserMapper;
 import com.liang.service_b.dao.UserParentMapper;
 import com.liang.service_b.entity.User;
+import com.liang.service_b.rpc.CommentClient;
 import com.liang.service_b.rpc.CourseClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,9 @@ public class UserService {
     @Autowired
     private CourseClient courseClient;
 
+    @Autowired
+    private CommentClient commentClient;
+
 
     @LcnTransaction //分布式事务注解
     @Transactional
@@ -36,25 +40,21 @@ public class UserService {
         user.getUserParent().setId(UUID.randomUUID().toString());
         user.getCourse().setUserId(user.getId());
         user.getUserParent().setUserId(user.getId());
+        user.getComment().setUserId(id);
 
-        userMapper.addUser(user);
-
-        ResponseEntity<String> result = null;
         try {
-            result = courseClient.addCourse(user.getCourse());
-            System.out.println(result);
 
-            if(result.getStatusCode() != HttpStatus.OK){
-                System.out.println("我在不是ok这里");
-                throw new RuntimeException(result.toString());
-            }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
+            userMapper.addUser(user);
+
+            courseClient.addCourse(user.getCourse());
+            commentClient.addComment(user.getComment());
+            userParentMapper.addParent(user.getUserParent());
+
+
+        }catch (Throwable e){
             System.out.println("我在抛异常这里");
-            throw new RuntimeException(throwable.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
-
-        userParentMapper.addParent(user.getUserParent());
 
         return "ok";
 

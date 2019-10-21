@@ -111,3 +111,8 @@ ribbon:
   MaxAutoRetries: 1       #对当前实例的重试次数
   eager-load:             #饿加载模式
     enabled: false
+
+logging:
+  level:
+    com.liang.service_b.dao: DEBUG
+    org.mybatis: DEBUG

@@ -22,6 +22,8 @@ public class User implements Serializable {
 
     private Course course;
 
+    private Comment comment;
+
 
     public String getId() {
         return id;
@@ -61,5 +63,13 @@ public class User implements Serializable {
 
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    public Comment getComment() {
+        return comment;
+    }
+
+    public void setComment(Comment comment) {
+        this.comment = comment;
     }
 }

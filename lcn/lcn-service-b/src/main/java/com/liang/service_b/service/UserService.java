@@ -3,6 +3,7 @@ package com.liang.service_b.service;
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.liang.service_b.dao.UserMapper;
 import com.liang.service_b.dao.UserParentMapper;
+import com.liang.service_b.entity.Course;
 import com.liang.service_b.entity.User;
 import com.liang.service_b.rpc.CommentClient;
 import com.liang.service_b.rpc.CourseClient;
@@ -46,7 +47,9 @@ public class UserService {
 
             userMapper.addUser(user);
 
-            courseClient.addCourse(user.getCourse());
+            ResponseEntity<String> responseEntity = courseClient.addCourse(user.getCourse());
+            responseEntity.getBody();
+
             commentClient.addComment(user.getComment());
             userParentMapper.addParent(user.getUserParent());
 

@@ -21,3 +21,10 @@ spring:
         max-active: 20
         max-wait: -1
     database: 9
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: LEGACYHTML5
+    cache: false
+    encoding: UTF-8

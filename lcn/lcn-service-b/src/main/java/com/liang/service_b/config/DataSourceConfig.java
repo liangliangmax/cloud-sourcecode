@@ -1,4 +1,4 @@
-package com.liang.dam.config;
+package com.liang.service_b.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -23,6 +24,7 @@ import java.sql.SQLException;
  */
 @Configuration
 @EnableTransactionManagement
+@RefreshScope
 public class DataSourceConfig {
 
     @Value("${spring.datasource.driver-class-name}")
@@ -71,6 +73,7 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
+    @RefreshScope
     public DataSource druidDataSource() {
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setUrl(url);
@@ -99,7 +102,6 @@ public class DataSourceConfig {
         }
         return druidDataSource;
     }
-
 
     //提供SqlSeesion
     @Bean(name = "sqlSessionFactory")

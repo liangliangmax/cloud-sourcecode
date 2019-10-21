@@ -1,0 +1,113 @@
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${eureka_host:localhost}:${eureka_port:8761}/eureka/
+
+
+server:
+  port: 8111
+
+
+spring:
+  application:
+    name: service-b
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+  main:
+    allow-bean-definition-overriding: true
+
+  redis:
+    host: 10.4.249.94
+    password: 123456
+
+  datasource:
+    url: jdbc:mysql://10.4.249.94:3306/liang?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&createDatabaseIfNotExist=true&useSSL=false&allowMultiQueries=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+    # 使用druid数据源
+    filters: stat
+    maxActive: 2000
+    initialSize: 10
+    maxWait: 60000
+    minIdle: 10
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: true
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 50
+
+mybatis:
+  mapper-locations: classpath*:mappers/**/*.xml
+
+
+# 是否开启日志记录。当开启以后需要配置对应logger的数据库连接配置信息。
+tx-lcn:
+  logger:
+    enabled: false
+    driver-class-name: ${spring.datasource.driver-class-name}
+    username: root
+    password: root
+    jdbc-url: jdbc:mysql://10.4.249.94:3306/tx-manager?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&createDatabaseIfNotExist=true&useSSL=false&allowMultiQueries=true
+
+
+
+#由于feign内置了hystrix功能，所以这里加一个配置即可，不加这个的话hystrix不启用
+feign:
+  hystrix:
+    enabled: true
+  httpclient:
+    enabled: true
+    connection-timeout: 30000          # 连接超时，默认：2000/毫秒
+    max-connections: 5000              # 最大连接数，默认：200
+    time-to-live-unit: milliseconds   # 响应超时的时间单位，默认：TimeUnit.SECONDS
+    time-to-live: 3000                # 生存时间，默认：900L
+    max-connections-per-route: 500    # 最大路由，默认：50
+    connection-timer-repeat: 3000
+  compression:
+    request:
+      enabled: true # 配置请求GZIP压缩
+      mime-types: text/xml,application/xml,application/json # 配置压缩支持的MIME TYPE
+      min-request-size: 2048 # 配置压缩数据大小的下限
+    response:
+      enabled: true # 配置响应GZIP压缩
+
+#rpc调用controller的超时时间有好几个因素控制
+#首先分两大块，第一块是ribbon，第二块是hystrix，即发送请求的超时时间和熔断的超时时间
+#现在controller里面模拟一个5s的查询数据库，首先hystrix的timeout.enable要设置为false，如果是true，则设置的别的时间不生效
+#然后就是hystrix的timeoutInMilliseconds，ribbon的ConnectTimeout，ReadTimeout三个时间，以时间值最小的那个为准，别的设置时间再大也没有用
+#设置hystrix的超时时间 详情参照https://github.com/Netflix/Hystrix/wiki/Configuration
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE #execution.isolation.strategy= THREAD|SEMAPHORE,两种线程隔离机制；RequestContextHolder.getRequestAttributes()该方法是从ThreadLocal变量里面取得对应信息的，当隔离策略为 THREAD 时，是没办法拿到 ThreadLocal 中的值的。
+          thread:
+            timeoutInMilliseconds:  60000 #用来设置thread和semaphore两种隔离策略的超时时间，默认值是1000
+          semaphore:
+            maxConcurrentRequests: 5000 #指任意时间点允许的并发数。当请求达到或超过该设置值后，其其余就会被拒绝
+      circuitBreaker:
+        sleepWindowInMilliseconds:  5000  #可以控制一个时间窗口内可进行一次请求测试，如果测试成功，则闭合熔断开关，否则还是打开状态，从而实现了快速失败和快速恢复。
+
+
+#设置ribbon的超时时间
+#根据如下配置，当访问到故障请求的时候，它会再尝试访问一次当前实例（次数由MaxAutoRetries配置），
+#如果不行，就换一个实例进行访问，
+#如果还是不行，再换一次实例访问（更换次数由MaxAutoRetriesNextServer配置），如果依然不行，返回失败信息。
+ribbon:
+  ConnectTimeout: 30000   #请求连接的超时时间
+  ReadTimeout: 30000      #请求处理的超时时间
+  OkToRetryOnAllOperations: false    #对所有操作请求都进行重试
+  MaxAutoRetriesNextServer: 3       #切换实例的重试次数
+  MaxAutoRetries: 1       #对当前实例的重试次数
+  eager-load:             #饿加载模式
+    enabled: false

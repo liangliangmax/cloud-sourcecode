@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.liang.service_a.dao.CourseInfoMapper" >
+    <resultMap id="BaseResultMap" type="com.liang.service_a.entity.CourseInfo" >
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="course_id" property="courseId" jdbcType="VARCHAR" />
+        <result column="course_info" property="courseInfo" jdbcType="VARCHAR" />
+
+    </resultMap>
+
+
+    <select id="list" resultMap="BaseResultMap">
+        select * from course_info
+    </select>
+
+    <insert id="addCourseInfo" parameterType="com.liang.service_a.entity.CourseInfo">
+      insert course_info values (#{id},#{courseId},#{courseInfo})
+
+    </insert>
+</mapper>

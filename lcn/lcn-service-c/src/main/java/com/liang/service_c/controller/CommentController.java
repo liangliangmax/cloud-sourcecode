@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+
 @RestController
 @RequestMapping("/comment")
 public class CommentController {
@@ -20,11 +23,22 @@ public class CommentController {
 
 
     @PostMapping("/addComment")
-    public ResponseEntity<String> addComment(@RequestBody Comment comment){
+    public ResponseEntity<String> addComment(@RequestBody Comment comment, HttpServletRequest request){
+
+        Enumeration<String> enumeration =  request.getHeaderNames();
+
+        if(enumeration.hasMoreElements()){
+            String name = enumeration.nextElement();
+
+            String values = request.getHeader(name);
+
+            System.out.println(name+" --> "+values);
+        }
 
         try {
             //调用时候直接将服务停掉，事务会回滚
             //System.exit(-1);
+            comment.setUserId("fdj8fj89sja9jf98d");
             commentService.addComment(comment);
 
         }catch (Exception e){

@@ -53,9 +53,9 @@ public class UserService {
             commentClient.addComment(user.getComment());
             userParentMapper.addParent(user.getUserParent());
 
-
         }catch (Throwable e){
             System.out.println("我在抛异常这里");
+            e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
 

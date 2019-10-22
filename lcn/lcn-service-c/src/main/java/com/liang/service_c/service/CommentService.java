@@ -34,7 +34,6 @@ public class CommentService {
 
         commentMapper.addComment(comment);
 
-        int i = 1/0;
         commentInfoMapper.addCommentInfo(comment.getCommentInfo());
 
         return "ok";

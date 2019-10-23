@@ -50,7 +50,9 @@ public class UserService {
             ResponseEntity<String> responseEntity = courseClient.addCourse(user.getCourse());
             responseEntity.getBody();
 
-            commentClient.addComment(user.getComment());
+            ResponseEntity clientc = commentClient.addComment(user.getComment());
+
+            System.out.println(clientc);
             userParentMapper.addParent(user.getUserParent());
 
         }catch (Throwable e){

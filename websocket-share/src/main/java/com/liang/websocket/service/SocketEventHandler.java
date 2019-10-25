@@ -54,7 +54,7 @@ public class SocketEventHandler {
         logger.info("接收到客户端消息");
 
         String lockKey = "shareTable:"+lockInfo.getTeacherId()+":"+lockInfo.getTime();
-        boolean lock = redisLockHelper.tryLock(lockKey,client.getSessionId().toString(),60, TimeUnit.SECONDS);
+        boolean lock = redisLockHelper.tryLock(lockKey,client.getSessionId().toString(),15, TimeUnit.SECONDS);
 
         if(lock){
             System.out.println("被上锁了");

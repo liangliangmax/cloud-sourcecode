@@ -2,13 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.liang.provider.mapper.UserMapper" >
 
-  <select id="selectAll" resultType="com.liang.api.com.liang.service_a.entity.User">
+  <select id="selectAll" resultType="com.liang.api.entity.User">
 
     select * from user
   </select>
 
   <!--如果age字段有默认值但是非必填，age字段有值就按值填写，如果没有值就按默认值填写，如果是必填字段，则必须设置值,有默认值也不行-->
-  <insert id="add" parameterType="com.liang.api.com.liang.service_a.entity.User">
+  <insert id="add" parameterType="com.liang.api.entity.User">
     insert into user (id,username,password,age) values (#{id},#{username},#{password},#{age})
 
   </insert>

@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  redis:
+    password: 123456
+    cluster:
+      nodes: 10.4.249.99:15001,10.4.249.99:15002,10.4.249.99:15003,10.4.249.99:15004,10.4.249.99:15005,10.4.249.99:15006
+      max-redirects: 5
+    timeout: 15000ms
+    lettuce:
+      pool:
+        #最大连接数
+        max-active: 8
+        #最大阻塞等待时间(负数表示没限制)
+        max-wait: -1
+        #最大空闲
+        max-idle: 8
+        #最小空闲
+        min-idle: 0
+        #连接超时时间
+        timeout: 10000
+    database: 0

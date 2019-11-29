@@ -9,6 +9,8 @@
         <module>service-provider</module>
         <module>service-consumer</module>
         <module>distribute-lock</module>
+        <module>sidecar</module>
+        <module>sidecar</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

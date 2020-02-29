@@ -1,0 +1,21 @@
+server:
+    port: 8080
+
+
+spring:
+    data:
+        mongodb:
+            host: 172.16.62.216
+            port: 27017
+            username: admin
+            password: admin
+            database: neuabc
+    datasource:
+        password: root
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://172.16.62.216:3306/liang_prod_test?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&createDatabaseIfNotExist=true&useSSL=false&allowMultiQueries=true
+        username: root
+
+logging:
+    level:
+        org.springframework.data.mongodb.core: DEBUG

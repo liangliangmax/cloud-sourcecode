@@ -1,0 +1,42 @@
+eureka:
+    instance:
+        health-check-url-path: ${server.servlet.context-path}/actuator/health
+        # docker 部署开启
+        prefer-ip-address: true
+        ip-address: ${host_ip:localhost}
+        metadata-map:
+            # 用来拦截/actutor/* 监控用的。要不然只要知道ip和端口就能看到监控信息。
+            # 这个参数在注册到eureka中时会带入eureka中，当客户端访问时候会调用
+            # de.codecentric.boot.admin.server.web.client.BasicAuthHttpHeaderProvider这个类，将这个信息放到消息头里面
+            user:
+                name: neupals
+                password: Neupals2019
+    client:
+        registerWithEureka: true
+        fetchRegistry: true
+        serviceUrl:
+            defaultZone: http://${eureka_host:localhost}:${eureka_port:8761}/eureka/                    # docker 部署开启
+
+
+spring:
+    profiles:
+        active: dev
+    application:
+        name: order-service
+
+
+server:
+    port: 8006 #启动端口
+    tomcat:
+        max-connections: 1024
+    servlet:
+        context-path:
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    endpoint:
+        health:
+            show-details: ALWAYS

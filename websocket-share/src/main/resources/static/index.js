@@ -5,7 +5,7 @@ var getTeachers = ()=>{
             url:"/data/teachers",
             type:'get',
             async:true,
-            contentType:'application/json;charse-UTF-8',
+            contentType:'application/json;charset-UTF-8',
             dataType:'json',
 
             success:function (data) {
@@ -124,7 +124,7 @@ function refreshLock() {
         url:"/data/refreshLock",
         type:'get',
         async:true,
-        contentType:'application/json;charse-UTF-8',
+        contentType:'application/json;charset-UTF-8',
         dataType:'json',
 
         success:function (data) {

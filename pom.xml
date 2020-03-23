@@ -11,11 +11,15 @@
         <module>distribute-lock</module>
         <module>sidecar</module>
         <module>sidecar</module>
+        <module>spring-session-serializer</module>
+        <module>netty</module>
+        <module>nio</module>
+        <module>seata</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.8.RELEASE</version>
+        <version>2.1.10.RELEASE</version>
     </parent>
     <groupId>com.liang</groupId>
     <artifactId>cloud-sourcecode</artifactId>

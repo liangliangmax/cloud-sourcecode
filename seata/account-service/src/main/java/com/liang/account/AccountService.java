@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.UUID;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class AccountService {
@@ -36,7 +38,7 @@ public class AccountService {
         accountMapper.updateByPrimaryKeySelective(account);
 
         Info info = new Info();
-        info.setId("1231232");
+        info.setId(UUID.randomUUID().toString());
         info.setDes("ahahah");
         infoMapper.insertSelective(info);
 

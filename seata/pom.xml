@@ -21,6 +21,7 @@
         <module>good-service</module>
         <module>order-service</module>
         <module>feign-client</module>
+        <module>test-module</module>
     </modules>
 
 

@@ -50,11 +50,13 @@ public class OrderController {
 
         Double orderPrice = buyCount * good.getPrice();
 
-
-
         accountClient.deduction(accountId, orderPrice);
 
-        goodClient.reduceStock(goodId, buyCount);
+        //会库存不够
+        for(int i = 0;i<20;i++){
+            goodClient.reduceStock(goodId, buyCount);
+        }
+
 
         Order order = toOrder(goodId, accountId, orderPrice);
         orderService.addOrder(order);

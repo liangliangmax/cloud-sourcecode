@@ -41,7 +41,7 @@ public class GoodService {
         good.setStock(good.getStock() - stock);
         goodMapper.updateByPrimaryKeySelective(good);
 
-        int i = 1/0;
+        //int i = 1/0;
 
     }
 }

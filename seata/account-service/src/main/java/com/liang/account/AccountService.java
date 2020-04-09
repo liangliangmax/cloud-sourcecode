@@ -7,10 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class AccountService {
 
     @Autowired
@@ -25,6 +26,7 @@ public class AccountService {
      * @param accountId {@link Account#getId()}
      * @param money     扣除的金额
      */
+    @Transactional(rollbackFor = Exception.class)
     public void deduction(Integer accountId, Double money) {
         Account account = accountMapper.selectByPrimaryKey(accountId);
 
@@ -37,10 +39,25 @@ public class AccountService {
         account.setMoney(account.getMoney().doubleValue() - money);
         accountMapper.updateByPrimaryKeySelective(account);
 
-        Info info = new Info();
-        info.setId(UUID.randomUUID().toString());
-        info.setDes("ahahah");
-        infoMapper.insertSelective(info);
+        List<Info> list = new ArrayList<>();
+        for(int i = 0;i<10;i++){
+            Info info = new Info();
+            info.setId(UUID.randomUUID().toString());
+            info.setDes(i+"");
+            list.add(info);
+        }
+
+        //正常的可以回滚
+        for (Info info : list){
+            infoMapper.insertSelective(info);
+
+            int a = 1/0;
+        }
+
+        //用表达式不会滚，事务无效
+        list.parallelStream().forEach(info -> {
+
+        });
 
     }
 

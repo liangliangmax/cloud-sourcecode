@@ -14,6 +14,6 @@ public interface AccountClient {
      * @param accountId 账户编号
      * @param money     金额
      */
-    @PostMapping
+    @PostMapping("/deduction")
     void deduction(@RequestParam("accountId") Integer accountId, @RequestParam("money") Double money);
 }

@@ -1,6 +1,6 @@
-package com.liang.mybatisinterceptor.interceptor;
+package com.neupals.common.data_permission.util;
 
-import com.liang.mybatisinterceptor.ISqlFilter;
+import com.neupals.common.data_permission.IGetPermissionIdColumn;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -24,57 +24,23 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.TablesNamesFinder;
-import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.executor.statement.StatementHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.plugin.*;
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.SystemMetaObject;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
-@Component
-@Intercepts({ @Signature(method = "prepare", type = StatementHandler.class, args = { Connection.class,Integer.class }) })
-public class PermissionHelper implements Interceptor {
+public class JSqlParserUtil {
 
-    @Autowired
-    private ISqlFilter sqlFilter;
-
-    @Override
-    public Object intercept(Invocation invocation) throws Throwable {
-        StatementHandler handler = (StatementHandler)invocation.getTarget();
-        //由于mappedStatement中有我们需要的方法id,但却是protected的，所以要通过反射获取
-        MetaObject statementHandler = SystemMetaObject.forObject(handler);
-        MappedStatement mappedStatement = (MappedStatement) statementHandler.getValue("delegate.mappedStatement");
-        //获取sql
-        BoundSql boundSql = handler.getBoundSql();
-        String sql = boundSql.getSql();
-        //获取方法id
-        String id = mappedStatement.getId();
-
-        System.out.println("开始拦截");
-
-        if (sqlFilter.needFilter(id, sql)) {
-            //获得方法类型
-            String newSQL = addWhere(sql);
-            if (newSQL != null) {
-                System.out.println(newSQL);
-                statementHandler.setValue("delegate.boundSql.sql", newSQL);
-            }
-        }
+    private IGetPermissionIdColumn getPermissionIdColumn;
 
 
-        return invocation.proceed();
+    public JSqlParserUtil build(IGetPermissionIdColumn getPermissionIdColumn){
 
+        if(getPermissionIdColumn == null) throw  new RuntimeException("请注入权限列工具");
+        this.getPermissionIdColumn = getPermissionIdColumn;
+
+        return this;
     }
+
 
     /**
      * 添加租户id条件newMs
@@ -83,7 +49,7 @@ public class PermissionHelper implements Interceptor {
      * @return
      * @throws JSQLParserException
      */
-    private String addWhere(String sql) throws Exception {
+    public String addWhere(String sql) throws Exception {
         Statement stmt = CCJSqlParserUtil.parse(sql);
         if (stmt instanceof Insert) {
             //获得Update对象
@@ -196,7 +162,7 @@ public class PermissionHelper implements Interceptor {
      * @return
      * @throws Exception
      */
-    public AndExpression addAndExpression(Statement stmt, String table, Expression where) throws Exception {
+    private AndExpression addAndExpression(Statement stmt, String table, Expression where) throws Exception {
         EqualsTo equalsTo = addEqualsTo(stmt, table);
         if (equalsTo != null) {
             return new AndExpression(equalsTo, where);
@@ -213,7 +179,7 @@ public class PermissionHelper implements Interceptor {
      * @return “A=B” 单个where条件表达式
      * @throws Exception
      */
-    public EqualsTo addEqualsTo(Statement stmt, String table) throws Exception {
+    private EqualsTo addEqualsTo(Statement stmt, String table) throws Exception {
         EqualsTo equalsTo = new EqualsTo();
         String aliasName;
         aliasName = getTableAlias(stmt, table);
@@ -234,7 +200,7 @@ public class PermissionHelper implements Interceptor {
      * @param tableName
      * @return
      */
-    public String getTableAlias(Statement stmt, String tableName) {
+    private String getTableAlias(Statement stmt, String tableName) {
         String alias = null;
 
         // 插入不做处理
@@ -285,7 +251,7 @@ public class PermissionHelper implements Interceptor {
      * @param tableName
      * @return
      */
-    public String getTableAlias(SubSelect subSelect, String tableName) {
+    private String getTableAlias(SubSelect subSelect, String tableName) {
         PlainSelect ps = (PlainSelect) subSelect.getSelectBody();
         // 判断主表的别名
         String alias = null;
@@ -381,12 +347,12 @@ public class PermissionHelper implements Interceptor {
         return select;
     }
 
-    public String getTenantIdColumn(){
-        return "create_user_id";
+    private String getTenantIdColumn(){
+        return getPermissionIdColumn.getPermissionIdColumn();
     }
 
-    public String getTenantId() throws Exception {
-        return "1111" ;
+    private String getTenantId() throws Exception {
+        return getPermissionIdColumn.getPermissionId() ;
     }
 
     /**
@@ -396,18 +362,5 @@ public class PermissionHelper implements Interceptor {
      */
     private void addTenantValue(ExpressionList expressionList) throws Exception {
         expressionList.getExpressions().add(new StringValue(getTenantId()));
-    }
-
-    @Override
-    public Object plugin(Object target) {
-        if (target instanceof StatementHandler) {
-            return Plugin.wrap(target, this);
-        }
-        return target;
-    }
-
-    @Override
-    public void setProperties(Properties properties) {
-
     }
 }

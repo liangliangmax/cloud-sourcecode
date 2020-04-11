@@ -1,0 +1,23 @@
+spring:
+    jackson:
+        date-format: yyyy-MM-dd HH:mm:ss
+        time-zone: GMT+8
+        default-property-inclusion: non_null
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://rm-bp15uqp5v5o1gs9x6o.mysql.rds.aliyuncs.com:3306/msms_dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&createDatabaseIfNotExist=true&useSSL=false&allowMultiQueries=true
+        username: neupals_msms_dev
+        password: neupals_msms_devpw
+
+
+mybatis:
+    mapper-locations: classpath*:mapper/**/*.xml
+
+
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+
+

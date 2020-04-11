@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liang.mybatisinterceptor.mapper.UserMapper">
+
+    <select id="findUser" resultType="com.liang.mybatisinterceptor.entity.Infodes">
+      select * from info_des where 1=1
+
+      <if test="id!=null and id!=''">
+          and id = #{id}
+      </if>
+
+      <if test="des!=null and des!=''">
+          and des like #{des}
+      </if>
+
+      order by id
+
+    </select>
+
+</mapper>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.liang.mybatisinterceptor.mapper.SalesOrderMapper" >
+  <resultMap id="BaseResultMap" type="com.liang.mybatisinterceptor.entity.SalesOrder" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="sales_order_bn" property="salesOrderBn" jdbcType="VARCHAR" />
+    <result column="sales_order_type" property="salesOrderType" jdbcType="VARCHAR" />
+    <result column="delivery_type" property="deliveryType" jdbcType="VARCHAR" />
+    <result column="channel_bn" property="channelBn" jdbcType="VARCHAR" />
+    <result column="promotion_bn" property="promotionBn" jdbcType="VARCHAR" />
+    <result column="addressee_nm" property="addresseeNm" jdbcType="VARCHAR" />
+    <result column="addressee_tel" property="addresseeTel" jdbcType="VARCHAR" />
+    <result column="addr_country" property="addrCountry" jdbcType="VARCHAR" />
+    <result column="addr_province" property="addrProvince" jdbcType="VARCHAR" />
+    <result column="addr_city" property="addrCity" jdbcType="VARCHAR" />
+    <result column="addr_area" property="addrArea" jdbcType="VARCHAR" />
+    <result column="addr_street" property="addrStreet" jdbcType="VARCHAR" />
+    <result column="addr_detail" property="addrDetail" jdbcType="VARCHAR" />
+    <result column="sales_order_total" property="salesOrderTotal" jdbcType="DECIMAL" />
+    <result column="sales_order_date" property="salesOrderDate" jdbcType="TIMESTAMP"/>
+    <result column="create_user_id" property="createUserId" jdbcType="VARCHAR" />
+    <result column="create_user_name" property="createUserName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="edit_user_id" property="editUserId" jdbcType="VARCHAR" />
+    <result column="edit_user_name" property="editUserName" jdbcType="VARCHAR" />
+    <result column="edit_time" property="editTime" jdbcType="TIMESTAMP" />
+    <result column="sales_order_status" property="salesOrderStatus" jdbcType="VARCHAR" />
+    <result column="check_status" property="checkStatus" jdbcType="VARCHAR" />
+    <result column="stock_status" property="stockStatus" jdbcType="VARCHAR" />
+    <result column="flag" property="flag" jdbcType="VARCHAR" />
+    <result column="checker_user_name" property="checkerUserName" jdbcType="VARCHAR" />
+    <result column="sales_user_name" property="salesUserName" jdbcType="VARCHAR" />
+    <result column="sales_order_demo" property="salesOrderDemo" jdbcType="LONGVARCHAR" />
+  </resultMap>
+
+
+  <select id="listSalesOrders" resultMap="BaseResultMap" parameterType="com.liang.mybatisinterceptor.entity.SalesOrderDto">
+      select * from
+          (SELECT
+          o.id,
+          o.sales_order_date,
+          cha.channel_nm AS channel_bn,
+          o.addressee_nm,
+          o.create_user_id,
+          o.sales_order_total,
+          o.sales_user_name,
+          o.checker_user_name,
+          case o.check_status
+          when '1' then '草稿'
+          when '2' then '待审批'
+          when '3' then '未通过'
+          when '4' then '已审批'
+          when '5' then '已执行'
+          when '6' then '已完成'
+          when '7' then '已取消'
+          end as check_status,
+
+          o.stock_status
+          FROM
+          sales_order o
+          left JOIN channel cha ON o.channel_bn = cha.id
+          UNION
+          SELECT
+          o.id,
+          o.sales_order_date,
+          cha.distributor_nm AS channel_bn,
+          o.addressee_nm,
+          o.create_user_id,
+          o.sales_order_total,
+          o.sales_user_name,
+          o.checker_user_name,
+          case o.check_status
+          when '1' then '草稿'
+          when '2' then '待审批'
+          when '3' then '未通过'
+          when '4' then '已审批'
+          when '5' then '已执行'
+          when '6' then '已完成'
+
+          WHEN '7' THEN '已取消'
+          END AS check_status,
+          o.stock_status
+          FROM
+          sales_order o
+      left JOIN distributor cha ON o.channel_bn = cha.id) result
+
+        <if test="postType != null and postType != ''">
+          join (select sales_order_bn, post_type from sales_order_detail group by sales_order_bn, post_type) d
+            on d.sales_order_bn = result.id and post_type = #{postType}
+        </if>
+
+      where result.channel_bn is not null
+
+
+      <if test="addresseeTel != null and addresseeTel != ''">
+        and o.addressee_tel = #{addresseeTel}
+      </if>
+      <if test="addresseeNm != null and addresseeNm != ''">
+        and o.addressee_nm = #{addresseeNm}
+      </if>
+      <if test="channelBn != null and channelBn != ''">
+        and o.channel_bn = #{channelBn}
+      </if>
+      <if test="addrProvince != null and addrProvince != ''">
+        and o.addr_province = #{addrProvince}
+      </if>
+      <if test="addrCity != null and addrCity != ''">
+        and o.addr_city = #{addrCity}
+      </if>
+      <if test="promotionBn != null and promotionBn != ''">
+        and o.promotion_bn = #{promotionBn}
+      </if>
+      <if test="salesOrderDateStart != null and salesOrderDateStart != ''">
+        and <![CDATA[and to_days(sales_order_date) >= to_days(#{salesOrderDateStart})]]>
+      </if>
+      <if test="salesOrderDateEnd != null and salesOrderDateEnd != ''">
+        and <![CDATA[and to_days(sales_order_date) >= to_days(#{salesOrderDateEnd})]]>
+      </if>
+
+    order by sales_order_date asc,addressee_nm asc
+  </select>
+
+</mapper>

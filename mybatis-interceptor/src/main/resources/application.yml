@@ -4,11 +4,29 @@ spring:
         time-zone: GMT+8
         default-property-inclusion: non_null
     datasource:
-        driver-class-name: com.mysql.jdbc.Driver
+        #   数据源基本配置
+        driver-class-name: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://rm-bp15uqp5v5o1gs9x6o.mysql.rds.aliyuncs.com:3306/msms_dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&createDatabaseIfNotExist=true&useSSL=false&allowMultiQueries=true
         username: neupals_msms_dev
         password: neupals_msms_devpw
-
+        type: com.alibaba.druid.pool.DruidDataSource
+        #   数据源其他配置
+        initialSize: 5
+        minIdle: 5
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+        filters: stat,wall
+        maxPoolPreparedStatementPerConnectionSize: 20
+        useGlobalDataSourceStat: true
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
 
 mybatis:
     mapper-locations: classpath*:mapper/**/*.xml

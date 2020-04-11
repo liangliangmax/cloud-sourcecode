@@ -21,7 +21,7 @@ import java.util.Properties;
 
 @Component
 @Intercepts({ @Signature(method = "prepare", type = StatementHandler.class, args = { Connection.class,Integer.class }) })
-public class MsMsPermissionHelper implements Interceptor {
+public class MsMsPermissionHelper implements IDataPermissionInterceptor {
 
     @Autowired
     @Qualifier("msmsSqlFilter")

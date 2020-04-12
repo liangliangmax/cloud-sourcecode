@@ -1,6 +1,8 @@
 package com.neupals.common.data_permission.util;
 
-import com.neupals.common.data_permission.IGetPermissionIdColumn;
+import com.neupals.common.dto.RestException;
+import com.neupals.common.dto.ResultCode;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -24,22 +26,23 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.TablesNamesFinder;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * sql解析的工具类，可以在where中添加字段
+ *
+ */
+@Slf4j
 public class JSqlParserUtil {
 
-    private IGetPermissionIdColumn getPermissionIdColumn;
+    //数据权限校验的字段
+    private String addColumn;
 
-
-    public JSqlParserUtil build(IGetPermissionIdColumn getPermissionIdColumn){
-
-        if(getPermissionIdColumn == null) throw  new RuntimeException("请注入权限列工具");
-        this.getPermissionIdColumn = getPermissionIdColumn;
-
-        return this;
-    }
+    //数据权限校验的值
+    private String addValue;
 
 
     /**
@@ -54,7 +57,7 @@ public class JSqlParserUtil {
         if (stmt instanceof Insert) {
             //获得Update对象
             Insert insert = (Insert) stmt;
-            insert.getColumns().add(new Column(getTenantIdColumn()));
+            insert.getColumns().add(new Column(getColumn()));
 
             if (insert.getItemsList() instanceof MultiExpressionList){
                 for (ExpressionList expressionList : ((MultiExpressionList) insert.getItemsList()).getExprList()) {
@@ -72,8 +75,8 @@ public class JSqlParserUtil {
             Expression where = deleteStatement.getWhere();
             if (where instanceof BinaryExpression) {
                 EqualsTo equalsTo = new EqualsTo();
-                equalsTo.setLeftExpression(new Column(getTenantIdColumn()));
-                equalsTo.setRightExpression(new StringValue(getTenantId()));
+                equalsTo.setLeftExpression(new Column(getColumn()));
+                equalsTo.setRightExpression(new StringValue(getValue()));
                 AndExpression andExpression = new AndExpression(equalsTo, where);
                 deleteStatement.setWhere(andExpression);
             }
@@ -88,11 +91,11 @@ public class JSqlParserUtil {
             if (where instanceof BinaryExpression) {
                 // 针对是否含where条件做不同处理
                 if (updateStatement.getWhere() != null) {
-                    updateStatement.setWhere(addAndExpression(stmt, getTenantIdColumn(), updateStatement.getWhere()));
+                    updateStatement.setWhere(addAndExpression(stmt, getColumn(), updateStatement.getWhere()));
                 } else {
                     EqualsTo equalsTo = new EqualsTo();
-                    equalsTo.setLeftExpression(new Column(getTenantIdColumn()));
-                    equalsTo.setRightExpression(new StringValue(getTenantId()));
+                    equalsTo.setLeftExpression(new Column(getColumn()));
+                    equalsTo.setRightExpression(new StringValue(getValue()));
                     updateStatement.setWhere(equalsTo);
                 }
             }
@@ -184,8 +187,8 @@ public class JSqlParserUtil {
         String aliasName;
         aliasName = getTableAlias(stmt, table);
         if (aliasName != null) {
-            equalsTo.setLeftExpression(new Column(aliasName + '.' + getTenantIdColumn()));
-            equalsTo.setRightExpression(new StringValue(getTenantId()));
+            equalsTo.setLeftExpression(new Column(aliasName + '.' + getColumn()));
+            equalsTo.setRightExpression(new StringValue(getValue()));
             return equalsTo;
         } else {
             return null;
@@ -347,20 +350,34 @@ public class JSqlParserUtil {
         return select;
     }
 
-    private String getTenantIdColumn(){
-        return getPermissionIdColumn.getPermissionIdColumn();
-    }
-
-    private String getTenantId() throws Exception {
-        return getPermissionIdColumn.getPermissionId() ;
-    }
-
     /**
      * 插入数据 添加租户id
      * @param expressionList
      * @throws Exception
      */
     private void addTenantValue(ExpressionList expressionList) throws Exception {
-        expressionList.getExpressions().add(new StringValue(getTenantId()));
+        expressionList.getExpressions().add(new StringValue(getValue()));
+    }
+
+    public String getColumn() {
+
+        if(StringUtils.isBlank(addColumn)) throw new RestException(ResultCode.ERROR,"请设置权限检查列的默认值");
+        return addColumn;
+    }
+
+    public JSqlParserUtil addColumn(String checkColumn) {
+        this.addColumn = checkColumn;
+        return this;
+    }
+
+    public String getValue() {
+        if(StringUtils.isBlank(addValue)) throw new RestException(ResultCode.ERROR,"请设置权限检查列的默认值");
+
+        return addValue;
+    }
+
+    public JSqlParserUtil addValue(String checkValue) {
+        this.addValue = checkValue;
+        return this;
     }
 }

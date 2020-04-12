@@ -1,10 +1,10 @@
 package com.neupals.common.data_permission;
 
-public interface IGetPermissionIdColumn {
+public interface IGetPermissionIdColumnService {
 
     //数据权限控制的列
-    String getPermissionIdColumn();
+    String getCheckColumn();
 
     //数据权限列对应的值
-    String getPermissionId();
+    String getCheckValue();
 }

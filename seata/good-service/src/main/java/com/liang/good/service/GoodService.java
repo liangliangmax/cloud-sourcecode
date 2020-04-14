@@ -1,5 +1,6 @@
-package com.liang.good;
+package com.liang.good.service;
 
+import com.liang.good.GoodMapper;
 import com.liang.seata.entity.Goods;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

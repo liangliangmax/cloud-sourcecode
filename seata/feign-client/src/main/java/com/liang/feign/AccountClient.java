@@ -1,5 +1,6 @@
 package com.liang.feign;
 
+import com.liang.seata.dto.RestApiResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,4 +17,8 @@ public interface AccountClient {
      */
     @PostMapping("/deduction")
     void deduction(@RequestParam("accountId") Integer accountId, @RequestParam("money") Double money);
+
+    @PostMapping("/deductionRest")
+    RestApiResult<Boolean> deductionRest(@RequestParam("accountId") Integer accountId, @RequestParam("money") Double money);
+
 }

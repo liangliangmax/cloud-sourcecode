@@ -1,5 +1,7 @@
-package com.liang.account;
+package com.liang.account.service;
 
+import com.liang.account.AccountMapper;
+import com.liang.account.InfoMapper;
 import com.liang.seata.entity.Account;
 import com.liang.seata.entity.Info;
 import org.springframework.beans.factory.annotation.Autowired;

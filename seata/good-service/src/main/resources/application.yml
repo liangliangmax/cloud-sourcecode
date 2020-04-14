@@ -23,7 +23,6 @@ logging:
         tk.mybatis: DEBUG
         com.liang.good: DEBUG
         org.springframework.jdbc.core.JdbcTemplate: DEBUG
-        io.seata: DEBUG
 
 
 #阿里分布式事务配置

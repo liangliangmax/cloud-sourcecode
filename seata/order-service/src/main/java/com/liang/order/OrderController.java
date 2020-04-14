@@ -2,6 +2,9 @@ package com.liang.order;
 
 import com.liang.feign.AccountClient;
 import com.liang.feign.GoodClient;
+import com.liang.order.service.OrderService;
+import com.liang.seata.dto.RestApiResult;
+import com.liang.seata.dto.ResultCode;
 import com.liang.seata.entity.Goods;
 import com.liang.seata.entity.Order;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -61,6 +64,48 @@ public class OrderController {
         Order order = toOrder(goodId, accountId, orderPrice);
         orderService.addOrder(order);
         return "下单成功.";
+    }
+
+    /**
+     * 测试一下rest的回滚
+     *
+     * 通过{@link GoodClient#reduceStock(Integer, int)}方法减少商品的库存，判断库存剩余数量
+     * 通过{@link AccountClient#deduction(Integer, Double)}方法扣除商品所需要的金额，金额不足由account-service抛出异常
+     *
+     * @param goodId    {@link Good#getId()}
+     * @param accountId {@link Account#getId()}
+     * @param buyCount  购买数量
+     * @return
+     */
+    @PostMapping(value = "/submitOrderRest")
+    @GlobalTransactional
+    public RestApiResult<String> submitOrderRest(
+            @RequestParam("goodId") Integer goodId,
+            @RequestParam("accountId") Integer accountId,
+            @RequestParam("buyCount") int buyCount) {
+
+        RestApiResult<Goods> goodsRestApiResult = goodClient.findByIdRest(goodId);
+
+        if(goodsRestApiResult.isSuccess()){
+
+            Double orderPrice = buyCount * goodsRestApiResult.getData().getPrice();
+
+            Order order = toOrder(goodId, accountId, orderPrice);
+            orderService.addOrder(order);
+
+            //会库存不够
+            //for(int i = 0;i<20;i++){
+                goodClient.reduceStockRest(goodId, buyCount);
+            //}
+
+            accountClient.deductionRest(accountId, orderPrice);
+
+
+            return RestApiResult.OK("下单成功");
+        }
+
+        return RestApiResult.ERROR(ResultCode.ERROR,"下单失败");
+
     }
 
     private Order toOrder(Integer goodId, Integer accountId, Double orderPrice) {

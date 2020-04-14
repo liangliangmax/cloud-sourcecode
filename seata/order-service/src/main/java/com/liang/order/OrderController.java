@@ -95,11 +95,16 @@ public class OrderController {
 
             //会库存不够
             //for(int i = 0;i<20;i++){
-                goodClient.reduceStockRest(goodId, buyCount);
+            RestApiResult<Boolean> booleanRestApiResult = goodClient.reduceStockRest(goodId, buyCount);
+            if(!booleanRestApiResult.isSuccess()){
+                return RestApiResult.ERROR(booleanRestApiResult.getCode(),booleanRestApiResult.getMessage());
+            }
             //}
 
-            accountClient.deductionRest(accountId, orderPrice);
-
+            RestApiResult<Boolean> booleanRestApiResult1 = accountClient.deductionRest(accountId, orderPrice);
+            if(!booleanRestApiResult1.isSuccess()){
+                return RestApiResult.ERROR(booleanRestApiResult1.getCode(),booleanRestApiResult1.getMessage());
+            }
 
             return RestApiResult.OK("下单成功");
         }

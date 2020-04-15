@@ -11,7 +11,6 @@
         <module>distribute-lock</module>
         <module>sidecar</module>
         <module>sidecar</module>
-        <module>spring-session-serializer</module>
         <module>netty</module>
         <module>nio</module>
         <module>data-permission-module</module>

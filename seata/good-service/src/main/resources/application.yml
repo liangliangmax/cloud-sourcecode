@@ -14,6 +14,14 @@ spring:
             seata:
                 tx-service-group: order-seata-group
 
+    sleuth:
+        sampler:
+            probability: 1.0
+
+    zipkin:
+        base-url: http://zipkin-server/
+        sender:
+            type: web
 
 mybatis:
     mapper-locations: classpath*:mapper/**/*.xml

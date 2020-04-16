@@ -13,6 +13,14 @@ spring:
         alibaba:
             seata:
                 tx-service-group: order-seata-group
+    sleuth:
+        sampler:
+            probability: 1.0
+
+    zipkin:
+        base-url: http://zipkin-server/
+        sender:
+            type: web
 
 
 mybatis:
@@ -94,3 +102,4 @@ seata:
         disable-global-transaction: false
         grouplist:
             seata-server: ${seata-server:172.16.62.216:8091}
+

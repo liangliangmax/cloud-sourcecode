@@ -10,11 +10,11 @@
         <module>service-consumer</module>
         <module>distribute-lock</module>
         <module>sidecar</module>
-        <module>sidecar</module>
         <module>netty</module>
         <module>nio</module>
         <module>data-permission-module</module>
         <module>seata</module>
+        <module>zipkin</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

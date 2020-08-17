@@ -1,0 +1,10 @@
+spring:
+    data:
+        mongodb:
+            enable: true
+            host: 172.16.62.216
+            port: 27017
+            username: admin
+            password: admin
+            auto-index-creation: false
+            database: neuabc

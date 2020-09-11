@@ -1,0 +1,24 @@
+server:
+    port: 8080
+spring:
+    batch:
+        initialize-schema: always
+
+
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://172.16.62.216:3306/batch_test?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&createDatabaseIfNotExist=true&useSSL=false&allowMultiQueries=true
+        username: root
+        password: root
+    main:
+        allow-bean-definition-overriding: true
+
+
+
+logging:
+    level:
+        com.liang.batch: INFO
+        org.springframework.jdbc: DEBUG
+        org.springframework.batch: INFO
+
+
